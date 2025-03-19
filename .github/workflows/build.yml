@@ -1,0 +1,41 @@
+name: Build .NET 8 Web App
+ 
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+ 
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+ 
+      - name: Restore Dependencies
+        run: dotnet restore
+ 
+      - name: Build Application
+        run: dotnet build --configuration Release --no-restore
+      - name: Run Mend Security Scan
+        uses: mend-tool/action@v1
+ 
+      - name: Run Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+ 
+      - name: Publish Application
+        run: dotnet publish -c Release -o ./publish
+ 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-app
+          path: ./publish
